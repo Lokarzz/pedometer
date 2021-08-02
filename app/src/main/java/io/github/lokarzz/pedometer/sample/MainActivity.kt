@@ -7,11 +7,10 @@ import io.github.lokarzz.pedometer.Pedometer
 
 class MainActivity : AppCompatActivity() {
 
-    val pedometer = Pedometer.instance?.register(this)
+    private val pedometer = Pedometer.getInstance()?.register(this)
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
-
         pedometer?.getDailySteps()?.subscribe { data ->
 
         }

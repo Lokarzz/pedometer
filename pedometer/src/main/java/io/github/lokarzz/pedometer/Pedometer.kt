@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.work.*
 import com.google.gson.Gson
+import io.github.lokarzz.pedometer.Pedometer.Result.PEDOMETER_INSTANCE_NOT_INITIALIZE
 import io.github.lokarzz.pedometer.pojo.PedometerData
 import io.github.lokarzz.pedometer.pojo.Steps
 import io.github.lokarzz.pedometer.service.PedometerWorker
@@ -27,6 +28,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.core.SingleEmitter
 import io.reactivex.rxjava3.schedulers.Schedulers
+import java.lang.NullPointerException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -120,7 +122,9 @@ class Pedometer(private val application: Application) {
 
         return object : SensorEventListener {
             override fun onSensorChanged(sensorEvent: SensorEvent) {
-
+                if (sensorEvent.sensor.type != Sensor.TYPE_STEP_COUNTER) {
+                    return
+                }
 
                 val sensorStepValue = getInt(sensorEvent.values[0])
 
@@ -276,7 +280,7 @@ class Pedometer(private val application: Application) {
         return pedometerData ?: PedometerData()
     }
 
-    fun saveData(pedometerData: PedometerData) {
+    private fun saveData(pedometerData: PedometerData) {
         val editor = application.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit()
         editor.putString(
             PedometerData::class.simpleName,
@@ -327,15 +331,23 @@ class Pedometer(private val application: Application) {
         const val KEY: String = "PEDOMETER_KEY"
         const val FILE: String = "io.github.lokarzz.pedometer"
 
-
-        var instance: Pedometer? = null
+        private var instance: Pedometer? = null
 
         fun initialize(application: Application) {
             instance = Pedometer(application)
+        }
+
+        fun getInstance(): Pedometer? {
+            return if (instance == null) {
+                throw NullPointerException(PEDOMETER_INSTANCE_NOT_INITIALIZE)
+            } else {
+                instance
+            }
         }
     }
 
     object Result {
         const val NOT_REGISTERED = "not_registered"
+        const val PEDOMETER_INSTANCE_NOT_INITIALIZE = "pedometer_instance_not_initialize"
     }
 }

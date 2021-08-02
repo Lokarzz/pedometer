@@ -22,7 +22,7 @@ class PedometerWorker(appContext: Context, params: WorkerParameters) :
         val contextText = inputData.getString(CONTEXT_TEXT)
         val smallIcon = inputData.getInt(SMALL_ICON, R.drawable.ic_walk)
 
-        val pedometer = Pedometer.instance ?: return Result.failure()
+        val pedometer = Pedometer.getInstance() ?: return Result.failure()
 
         setForeground(createForegroundInfo(title, contextText, smallIcon))
 
